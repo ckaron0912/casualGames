@@ -1,0 +1,87 @@
+{
+    "level":[
+        {
+            "levelName": "Level 1",
+            "track": "planet",
+            "trackBPM": 105.25,
+            "highScore": 0,
+            "numEnemies": 5,
+            "enemyType": ["normal"],
+            "spawnRate": 1,
+            "waveRate": 8.77,
+            "spawnPoints": 4,
+            "spawnPointCoords": [
+                {"x": 200, "y": -50},
+                {"x": 800, "y": 740},
+                {"x": -10, "y": 400},
+                {"x": 1300, "y": 400},
+                {"x": 700, "y": -30},
+                {"x": 700, "y": 740},
+                {"x": 1300, "y": 100}
+            ],
+            "paths":[
+                {
+                    "x":[80,720,1200],
+                    "y":[360,50,360]
+                }
+            ],
+            "completed": true
+        },
+        
+        {
+            "levelName": "Level 2",
+            "track": "akira",
+            "trackBPM": 126.2,
+            "highScore": 0,
+            "numEnemies": 7,
+            "enemyType": ["normal"],
+            "spawnRate": 1,
+            "waveRate": 8.413,
+            "spawnPoints": 4,
+            "spawnPointCoords": [
+                {"x": 200, "y": -50},
+                {"x": 800, "y": 740},
+                {"x": -10, "y": 400},
+                {"x": 1300, "y": 400},
+                {"x": 700, "y": -30},
+                {"x": 700, "y": 740},
+                {"x": 1300, "y": 100}
+            ],
+            "paths":[
+                {
+                    "x":[80,720,1200],
+                    "y":[360,500,360]
+                }
+            ],
+            "completed": false
+        },
+        
+        {
+            "levelName": "Level 3",
+            "track": "endlessFantasy",
+            "trackBPM": 128.5,
+            "highScore": 0,
+            "numEnemies": 9,
+            "enemyType": ["normal"],
+            "spawnRate": 1,
+            "waveRate": 6.425,
+            "spawnPoints": 4,
+            "spawnPointCoords": [
+                {"x": 200, "y": -50},
+                {"x": 800, "y": 740},
+                {"x": -10, "y": 400},
+                {"x": 1300, "y": 400},
+                {"x": 700, "y": -30},
+                {"x": 700, "y": 740},
+                {"x": 1300, "y": 100}
+            ],
+            "paths":[
+                {
+                    "x":[80,720,800,700,1200],
+                    "y":[360,50,500,400,360]
+                }
+            ],
+            "completed": false
+        }
+    ]
+}

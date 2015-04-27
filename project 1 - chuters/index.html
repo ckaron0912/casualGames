@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	
+	<head>
+		<meta charset="utf-8" />
+		<title>CHUTERS</title>
+
+		<style type="text/css">
+			@font-face {
+			    font-family: "8Bit";
+			    src: url('media/fonts/8bit16-webfont.eot');
+			    src: url('media/fonts/8bit16-webfont.eot?#iefix') format('embedded-opentype'),
+			         url('media/fonts/8bit16-webfont.woff2') format('woff2'),
+			         url('media/fonts/8bit16-webfont.woff') format('woff'),
+			         url('media/fonts/8bit16-webfont.ttf') format('truetype'),
+			         url('media/fonts/8bit16-webfont.svg#8_bit_1_6regular') format('svg');
+				}
+
+			body {
+				width: 100%;
+				margin: 0 auto;
+				text-align: center;
+				font-family: '8Bit';
+				}
+
+			p {
+				clear: both;
+			}
+
+			canvas {
+				border: 1px solid black;
+				}
+		</style>
+
+		<script src="js/bullet.js"></script>
+		<script src="js/spriteObject.js"></script>
+		<script src="js/utilities.js"></script>
+		<script src="js/main.js"></script>
+	</head>
+
+	<body>
+		<h1>CHUTERS</h1>
+
+		<canvas id="canvas"></canvas>
+
+		<p><img src="media/images/ib_logo.png" width="200" height="150"></p>
+		<p>Created by Derrick Hunt and Chad Karon</p>
+		<p>&copy; 2015</p>
+
+		<section id="audioFiles">
+			<audio id="landedSound" src="media/audio/landedSound.wav"></audio>
+			<audio id="missedSound" src="media/audio/missedSound.wav"></audio>
+			<audio id="planeSound" src="media/audio/planeSound.wav"></audio>
+			<audio id="bomberSound" src="media/audio/bomberSound.wav"></audio>
+			<audio id="bombSound" src="media/audio/bombSound.wav"></audio>
+			<audio id="bulletSound" src="media/audio/bulletSound.wav"></audio>
+			<audio id="gameOverSound" src="media/audio/gameOver.mp3"></audio>
+			<audio id="menuLoopSound" src="media/audio/menuLoopSound.mp3" loop></audio>
+		</section>
+
+	</body>
+	
+</html>
