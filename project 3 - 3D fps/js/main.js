@@ -21,24 +21,28 @@ var MATERIAL = Object.seal({
 var scene;
 var camera;
 var renderer;
-var raycaster;
-var prevTime = performance.now();
-var velocity = new THREE.Vector3();
-
 var geometry;
 var material;
 var mesh;
-
+    
+var world;
+var solver;
+var physicsMaterial;
+var sphereShape;
+var sphereBody;
+var bulletShape;
+var bulletGeometry;
+var shootDirection;
+var shootVelocity = 30;
+var bulletRadius = 0.1;
 var walls = [];
 var bullets = [];
+var bulletMeshes = [];
+var boxes = [];
+var boxMeshes = [];
 
-var controls;
-var controlsEnabled = false;
-var moveForward = false;
-var moveBackward = false;
-var moveLeft = false;
-var moveRight = false;
-var canJump = true;
+var controls = Date.now; 
+var time = Date.now;
 
 //HTML elements
 var blocker = document.getElementById('blocker');
@@ -49,17 +53,64 @@ var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement
 setupPointerLock();
 
 //Start game
-init();
+initCannon();
+initScene();
 render();
 
 //Core functions
-function init() {
+function initCannon() {
+    //set up physics world
+    world = new CANNON.World();
+    world.quatNormalizeSkip = 0;
+    world.quatNormalizeFast = false;
+    world.defaultContactMaterial.contactEquationStiffness = 1e9;
+    world.defaultContactMaterial.contactEquationRelaxation = 4;
+    
+    var solver = new CANNON.GSSolver();
+    solver.iterations = 10;
+    solver.tolerance = 0.1;
+    
+    var split = true;
+    if(split)
+        world.solver = new CANNON.SplitSolver(solver);
+    else
+        world.solver = solver;
+    
+    world.gravity.set(0, -20, 0);
+    world.broadphase = new CANNON.NaiveBroadphase();
+    
+    //create physics material
+    physicsMaterial = new CANNON.Material("slipperyMaterial");
+    var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,
+                                                            physicsMaterial,
+                                                            0.0, // friction coefficient
+                                                            0.3  // restitution
+                                                            );
+    world.addContactMaterial(physicsContactMaterial);
+    
+    //create player sphere
+    var mass = 5;
+    var radius = 1.3;
+    sphereShape = new CANNON.Sphere(radius);
+    sphereBody = new CANNON.Body({ mass: mass });
+    sphereBody.addShape(sphereShape);
+    sphereBody.position.set(0, 5, 0);
+    sphereBody.linearDamping = 0.9;
+    world.addBody(sphereBody);
+    
+    // Create a plane
+    var groundShape = new CANNON.Plane();
+    var groundBody = new CANNON.Body({ mass: 0 });
+    groundBody.addShape(groundShape);
+    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+    world.addBody(groundBody);
+}
+    
+function initScene() {
     scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0xffffff, 0, 750);
     
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-
-    raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     
     setupLights();
     setupFloor();
@@ -72,16 +123,33 @@ function init() {
     
 function render() {
     requestAnimationFrame(render);
-
-    processControls();
-
+    
+    if (controls.enabled) {
+        var dt = 1 / 60;
+        world.step(dt);
+        
+        //update bullet positions
+        for(var i = 0; i < bullets.length; i++){
+            bulletMeshes[i].position.copy(bullets[i].position);
+            bulletMeshes[i].quaternion.copy(bullets[i].quaternion);
+        }
+        
+        //update box positions
+        for(var i = 0; i < boxes.length; i++){
+            boxMeshes[i].position.copy(boxes[i].position);
+            boxMeshes[i].quaternion.copy(boxes[i].quaternion);
+        }
+    }
+    
+    controls.update(Date.now() - time);
+    
     renderer.render(scene, camera);
+    
+    time = Date.now();
 }
 
 //Helper functions
 function setupPointerLock() {
-    console.log('Hello');
-    
     if (havePointerLock) {
         //hook pointer lock state change events
         document.addEventListener('pointerlockchange', pointerLockChange, false);
@@ -106,9 +174,16 @@ function setupLights() {
     light.target.position.set(0, 0, 0);
     scene.add(light);
     
-    var spotLight = new THREE.SpotLight(0xff0000);
-    spotLight.position.set(0, 100, 0);
+    var spotLight = new THREE.SpotLight(0x00ffff);
+    spotLight.position.set(0, 30, 0);
     spotLight.castShadow = true;
+    spotLight.shadowCameraNear = 20;
+    spotLight.shadowCameraFar = 50;
+    spotLight.shadowCameraFov = 40;
+    spotLight.shadowMapBias = 0.1;
+    spotLight.shadowMapDarkness = 0.7;
+    spotLight.shadowMapWidth = 2*512;
+    spotLight.shadowMapHeight = 2*512;
     scene.add(spotLight);
 }
 
@@ -123,87 +198,62 @@ function setupFloor() {
 }
 
 function setupWalls() {
-    geometry = new THREE.BoxGeometry(20, 20, 20);
+    var halfExtents = new CANNON.Vec3(1, 1, 1);
+    var boxShape = new CANNON.Box(halfExtents);
+    var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
     
-    for (var i = 0; i < 100; i++) {
-        material = new THREE.MeshPhongMaterial({ color: 0xeeeeee, specular: 0xffffff, shading: THREE.FlatShading });
-
-        var mesh = new THREE.Mesh(geometry, material);
-        mesh.position.x = Math.floor(Math.random() * 20 - 10) * 20;
-        mesh.position.y += 10;
-        mesh.position.z = Math.floor(Math.random() * 20 - 10) * 20;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        scene.add(mesh);
-
-        walls.push(mesh);
+    for(var i = 0; i < 20; i++) {
+        var x = (Math.random() - 0.5) * 20;
+        var y = 2;
+        var z = (Math.random()  -0.5) * 20;
+        
+        var boxBody = new CANNON.Body({ mass: 1 });
+        boxBody.addShape(boxShape);
+        boxBody.position.set(x, y, z);
+        world.addBody(boxBody);
+        
+        var boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(x, y, z);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+        
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
     }
 }
     
 function setupControls() {
-    controls = new THREE.PointerLockControls(camera);
+    controls = new PointerLockControls(camera, sphereBody);
     scene.add(controls.getObject());
-    
-    document.addEventListener('keydown', onKeyDown, false);
-    document.addEventListener('keyup', onKeyUp, false);
+    window.addEventListener('click', onFire, false);
 }
-    
+
 function setupRenderer() {
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setClearColor(0xffffff);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMapEnabled = true;
+    renderer.shadowMapSoft = true;
     document.body.appendChild(renderer.domElement);
 }
-    
-function processControls() {
-     if (controlsEnabled) {
-        raycaster.ray.origin.copy(controls.getObject().position);
-        raycaster.ray.origin.y -= 10;
 
-        var intersections = raycaster.intersectObjects(walls);
-
-        var isOnObject = intersections.length > 0;
-
-        var time = performance.now();
-        var delta = (time - prevTime) / 1000;
-
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
-        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-
-        if (moveForward) velocity.z -= 400.0 * delta;
-        if (moveBackward) velocity.z += 400.0 * delta;
-
-        if (moveLeft) velocity.x -= 400.0 * delta;
-        if (moveRight) velocity.x += 400.0 * delta;
-
-        if (isOnObject === true) {
-            velocity.y = Math.max( 0, velocity.y );
-            canJump = true;
-        }
-
-        controls.getObject().translateX( velocity.x * delta );
-        controls.getObject().translateY( velocity.y * delta );
-        controls.getObject().translateZ( velocity.z * delta );
-
-        if (controls.getObject().position.y < 10) {
-            velocity.y = 0;
-            controls.getObject().position.y = 10;
-
-            canJump = true;
-        }
-        
-        prevTime = time;
-    }
+function getShootDirection(targetVector) {
+    var vector = targetVector;
+    targetVector.set(0, 0, 1);
+    vector.unproject(camera);
+    var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
+    targetVector.copy(ray.direction);
 }
     
 //Event listeners
 function pointerLockChange(event) {
+    console.log(event);
+    
     var element = document.body;
     
     if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-        controlsEnabled = true;
         controls.enabled = true;
 
         blocker.style.display = 'none';
@@ -241,56 +291,44 @@ function onInstructionsClick(event) {
         element.requestPointerLock();
     }
 }
-    
-function onKeyDown(event){
-    switch (event.keyCode) {
-        case 38: // up
-        case 87: // w
-            moveForward = true;
-            break;
 
-        case 37: // left
-        case 65: // a
-            moveLeft = true; break;
-
-        case 40: // down
-        case 83: // s
-            moveBackward = true;
-            break;
-
-        case 39: // right
-        case 68: // d
-            moveRight = true;
-            break;
-
-        case 32: // space
-            if (canJump === true) velocity.y += 350;
-            canJump = false;
-            break;
-    }
-}
-
-function onKeyUp(event) {
-    switch(event.keyCode) {
-        case 38: // up
-        case 87: // w
-            moveForward = false;
-            break;
-
-        case 37: // left
-        case 65: // a
-            moveLeft = false;
-            break;
-
-        case 40: // down
-        case 83: // s
-            moveBackward = false;
-            break;
-
-        case 39: // right
-        case 68: // d
-            moveRight = false;
-            break;
+function onFire(event) {
+    if (controls.enabled) {
+        //create bullet
+        bulletShape = new CANNON.Sphere(bulletRadius);
+        bulletGeometry = new THREE.SphereGeometry(bulletRadius, 32, 32);
+        shootDirection = new THREE.Vector3();
+        
+        //get initial position
+        var x = sphereBody.position.x;
+        var y = sphereBody.position.y;
+        var z = sphereBody.position.z;
+        
+        //add body
+        var bulletBody = new CANNON.Body({ mass: 100 });
+        bulletBody.addShape(bulletShape);
+        world.addBody(bulletBody);
+        bullets.push(bulletBody);
+        
+        //add mesh
+        var bulletMesh = new THREE.Mesh(bulletGeometry, material);
+        bulletMesh.castShadow = true;
+        bulletMesh.receiveShadow = true;
+        scene.add(bulletMesh);
+        bulletMeshes.push(bulletMesh);
+        
+        //set velocity
+        getShootDirection(shootDirection);
+        bulletBody.velocity.set(  shootDirection.x * shootVelocity,
+                                shootDirection.y * shootVelocity,
+                                shootDirection.z * shootVelocity);
+        
+        //move the ball outside the player sphere
+        x += shootDirection.x * (sphereShape.radius * 1.02 + bulletShape.radius);
+        y += shootDirection.y * (sphereShape.radius * 1.02 + bulletShape.radius);
+        z += shootDirection.z * (sphereShape.radius * 1.02 + bulletShape.radius);
+        bulletBody.position.set(x, y, z);
+        bulletMesh.position.set(x, y, z);
     }
 }
 

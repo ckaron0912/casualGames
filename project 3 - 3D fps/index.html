@@ -11,11 +11,16 @@
             height: 100%;
         }
         
+        @font-face {
+            font-family: Avengeance;
+            src: url(../media/fonts/avengeance.otf);
+        }
+        
         body {
             background-color: #ffffff;
             margin: 0;
             overflow: hidden;
-            font-family: 'Avengeance', arial;
+            font-family: Arial, sans-serif;
         }
         
         #blocker {
@@ -50,6 +55,17 @@
             
             cursor: pointer;
         }
+        
+        #hud {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            font-family: 'Avengeance', Arial, sans-serif;
+        }
+        
+        #health {
+            float: left;
+        }
     </style>
     
     <script type="text/javascript" src="js/three.min.js"></script>
@@ -61,11 +77,22 @@
 <body>
 	<div id="blocker">
         <div id="instructions">
-            <span style="font-size:40px">Click to play</span>
+            <span style="font:72px Avengeance">Superhero Shootout</span>
             <br />
-            (W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+            <span style="font-size: 36px">Click to play</span>
+            <br />
+            <br />
+            <span style="font-size: 24px">[W] [A] [S] [D] = Movement</span>
+            <br />
+            <span style="font-size: 24px">[SPACE] = Jump</span>
+            <br />
+            <span style="font-size: 24px">[MOUSE] = Look</span>
+            <br />
+            <span style="font-size: 24px">[CLICK] = Shoot</span>
         </div>
     </div>
+    
+    
 </body>
 
 </html>
