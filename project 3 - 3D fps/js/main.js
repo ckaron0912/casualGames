@@ -24,9 +24,17 @@ var renderer;
 var geometry;
 var material;
 var mesh;
-    
+var characterMesh;
+
+var firstPerson = false;
+var thirdPerson = true;
+var x = -0.2;
+var y = 0.4;
+var z = 1;
+var keyboard;
 var world;
 var solver;
+var vector;
 var physicsMaterial;
 var sphereShape;
 var sphereBody;
@@ -111,12 +119,14 @@ function initScene() {
     scene.fog = new THREE.Fog(0xffffff, 0, 750);
     
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
+    keyboard = new KeyboardState();
+	
     setupLights();
     setupFloor();
     setupWalls();
     setupControls();
     setupRenderer();
+	setupModels();
 
     window.addEventListener('resize', onWindowResize, false);
 }
@@ -139,6 +149,8 @@ function render() {
             boxMeshes[i].position.copy(boxes[i].position);
             boxMeshes[i].quaternion.copy(boxes[i].quaternion);
         }
+		
+		keyboardControls();
     }
     
     controls.update(Date.now() - time);
@@ -239,9 +251,58 @@ function setupRenderer() {
     document.body.appendChild(renderer.domElement);
 }
 
+function setupModels() {
+    var loader = new THREE.OBJMTLLoader();
+	loader.load('models/testExport.obj', 'models/testExport.mtl', function (loadedMesh) {
+        var material = new THREE.MeshPhongMaterial({color:0xf0f0f0});
+        // loadedMesh is a group of meshes. For
+        // each mesh set the material, and compute the information
+        // three.js needs for rendering.
+        loadedMesh.children.forEach(function (child) {
+            child.material = material;
+            child.geometry.computeFaceNormals();
+            child.geometry.computeVertexNormals();
+        });
+
+        characterMesh = loadedMesh;
+        loadedMesh.scale.set(0.5, 0.5, 0.5);
+		loadedMesh.position.x = -1;
+		loadedMesh.position.y = -1.2;
+		loadedMesh.position.z = -1;
+		loadedMesh.rotation.y = 3.1;
+		//loadedMesh.rotation.x = -0.2;
+        scene.add(loadedMesh);
+		camera.add(characterMesh);
+    });
+}
+
+function keyboardControls() {
+	keyboard.update();
+		
+	if(keyboard.pressed("F") && firstPerson == false){
+		firstPerson = true;
+		thirdPerson = false;
+		characterMesh.position.x = 0;
+		characterMesh.position.y = -1.6;
+		characterMesh.position.z = 0.15;
+		x = 0.25;
+		y = 0.3;
+		z = 0;
+	}else if(keyboard.pressed("F") && firstPerson == true){
+		firstPerson = false;
+		thirdPerson = true;
+		characterMesh.position.x = -1;
+		characterMesh.position.y = -1.2;
+		characterMesh.position.z = -1;
+		x = -0.2;
+		y = 0.4;
+		z = 1;
+	}
+}
+
 function getShootDirection(targetVector) {
-    var vector = targetVector;
-    targetVector.set(0, 0, 1);
+    vector = targetVector;
+    targetVector.set(x, y, z);
     vector.unproject(camera);
     var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
     targetVector.copy(ray.direction);
