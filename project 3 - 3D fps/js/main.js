@@ -2,7 +2,6 @@
 
 window.onload = function() {
     
-<<<<<<< HEAD
     //Constant Objects (not used yet)
     /*
     var GAME = Object.freeze({
@@ -129,7 +128,6 @@ window.onload = function() {
 
     function render() {
         requestAnimationFrame(render);
-=======
 //Constant Objects (not used yet)
 /*
 var GAME = Object.freeze({
@@ -265,7 +263,6 @@ function render() {
     if (controls.enabled) {
         var dt = 1 / 60;
         world.step(dt);
->>>>>>> origin/master
         
         if (controls.enabled) {
             var dt = 1 / 60;
@@ -286,13 +283,11 @@ function render() {
             gamepadMovement(dt);
         }
         
-<<<<<<< HEAD
         controls.update(Date.now() - time);
 
         renderer.render(scene, camera);
 
         time = Date.now();
-=======
         //update box positions
         for(var i = 0; i < boxes.length; i++){
             boxMeshes[i].position.copy(boxes[i].position);
@@ -300,7 +295,6 @@ function render() {
         }
 		
 		keyboardControls();
->>>>>>> origin/master
     }
     
     function gamepadMovement(dt){
@@ -418,8 +412,6 @@ function render() {
         spotLight.shadowMapHeight = 2*512;
         scene.add(spotLight);
     }
-<<<<<<< HEAD
-=======
 }
     
 function setupControls() {
@@ -503,7 +495,6 @@ function pointerLockChange(event) {
     
     if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
         controls.enabled = true;
->>>>>>> origin/master
 
     function setupFloor() {
         geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
