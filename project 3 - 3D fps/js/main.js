@@ -314,7 +314,7 @@ window.onload = function() {
     function setupModels() {
         var loader = new THREE.OBJMTLLoader();
         loader.load('models/testExport.obj', 'models/testExport.mtl', function (loadedMesh) {
-            var material = new THREE.MeshPhongMaterial({color:0xf0f0f0});
+            var material = new THREE.MeshPhongMaterial({map:THREE.ImageUtils.loadTexture( "textures/texture.jpg" )});
             // loadedMesh is a group of meshes. For
             // each mesh set the material, and compute the information
             // three.js needs for rendering.
@@ -339,7 +339,7 @@ window.onload = function() {
     function keyboardControls() {
         keyboard.update();
 
-        if(keyboard.pressed("F") && firstPerson == false){
+        if(keyboard.down("F") && firstPerson == false){
             firstPerson = true;
             thirdPerson = false;
             characterMesh.position.x = 0;
@@ -348,7 +348,7 @@ window.onload = function() {
             x = 0.25;
             y = 0.3;
             z = 0;
-        }else if(keyboard.pressed("F") && firstPerson == true){
+        }else if(keyboard.down("F") && firstPerson == true){
             firstPerson = false;
             thirdPerson = true;
             characterMesh.position.x = -1;
@@ -413,7 +413,7 @@ window.onload = function() {
 
     function getShootDirection(targetVector) {
         var vector = targetVector;
-        targetVector.set(0, 0, 1);
+        targetVector.set(x, y, z);
         vector.unproject(camera);
         var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
         targetVector.copy(ray.direction);
