@@ -1,7 +1,6 @@
 "use strict"
 
 window.onload = function() {
-    
     //Constant Objects (not used yet)
     /*
     var GAME = Object.freeze({
@@ -24,9 +23,17 @@ window.onload = function() {
     var geometry;
     var material;
     var mesh;
+    var characterMesh;
 
+    var firstPerson = false;
+    var thirdPerson = true;
+    var x = -0.2;
+    var y = 0.4;
+    var z = 1;
+    var keyboard;
     var world;
     var solver;
+    var vector;
     var physicsMaterial;
     var sphereShape;
     var sphereBody;
@@ -116,154 +123,22 @@ window.onload = function() {
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        keyboard = new KeyboardState();
 
         setupLights();
         setupFloor();
         setupWalls();
         setupControls();
         setupRenderer();
+        setupModels();
 
         window.addEventListener('resize', onWindowResize, false);
     }
 
     function render() {
+
         requestAnimationFrame(render);
-//Constant Objects (not used yet)
-/*
-var GAME = Object.freeze({
-    width: 640,
-    height: 360,
-    fieldWidth: 400,
-    fieldHeight: 200
-});
-var MATERIAL = Object.seal({
-    groundMaterial: undefined,
-    wallMaterial: undefined,
-    bulletMaterial: undefined
-});
-*/
 
-//Variables
-var scene;
-var camera;
-var renderer;
-var geometry;
-var material;
-var mesh;
-var characterMesh;
-
-var firstPerson = false;
-var thirdPerson = true;
-var x = -0.2;
-var y = 0.4;
-var z = 1;
-var keyboard;
-var world;
-var solver;
-var vector;
-var physicsMaterial;
-var sphereShape;
-var sphereBody;
-var bulletShape;
-var bulletGeometry;
-var shootDirection;
-var shootVelocity = 30;
-var bulletRadius = 0.1;
-var walls = [];
-var bullets = [];
-var bulletMeshes = [];
-var boxes = [];
-var boxMeshes = [];
-
-var controls = Date.now; 
-var time = Date.now;
-
-//HTML elements
-var blocker = document.getElementById('blocker');
-var instructions = document.getElementById('instructions');
-
-//Set up pointerLock
-var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-setupPointerLock();
-
-//Start game
-initCannon();
-initScene();
-render();
-
-//Core functions
-function initCannon() {
-    //set up physics world
-    world = new CANNON.World();
-    world.quatNormalizeSkip = 0;
-    world.quatNormalizeFast = false;
-    world.defaultContactMaterial.contactEquationStiffness = 1e9;
-    world.defaultContactMaterial.contactEquationRelaxation = 4;
-    
-    var solver = new CANNON.GSSolver();
-    solver.iterations = 10;
-    solver.tolerance = 0.1;
-    
-    var split = true;
-    if(split)
-        world.solver = new CANNON.SplitSolver(solver);
-    else
-        world.solver = solver;
-    
-    world.gravity.set(0, -20, 0);
-    world.broadphase = new CANNON.NaiveBroadphase();
-    
-    //create physics material
-    physicsMaterial = new CANNON.Material("slipperyMaterial");
-    var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,
-                                                            physicsMaterial,
-                                                            0.0, // friction coefficient
-                                                            0.3  // restitution
-                                                            );
-    world.addContactMaterial(physicsContactMaterial);
-    
-    //create player sphere
-    var mass = 5;
-    var radius = 1.3;
-    sphereShape = new CANNON.Sphere(radius);
-    sphereBody = new CANNON.Body({ mass: mass });
-    sphereBody.addShape(sphereShape);
-    sphereBody.position.set(0, 5, 0);
-    sphereBody.linearDamping = 0.9;
-    world.addBody(sphereBody);
-    
-    // Create a plane
-    var groundShape = new CANNON.Plane();
-    var groundBody = new CANNON.Body({ mass: 0 });
-    groundBody.addShape(groundShape);
-    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-    world.addBody(groundBody);
-}
-    
-function initScene() {
-    scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xffffff, 0, 750);
-    
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    keyboard = new KeyboardState();
-	
-    setupLights();
-    setupFloor();
-    setupWalls();
-    setupControls();
-    setupRenderer();
-	setupModels();
-
-    window.addEventListener('resize', onWindowResize, false);
-}
-    
-function render() {
-    requestAnimationFrame(render);
-    
-    if (controls.enabled) {
-        var dt = 1 / 60;
-        world.step(dt);
-        
         if (controls.enabled) {
             var dt = 1 / 60;
             world.step(dt);
@@ -282,95 +157,102 @@ function render() {
             
             gamepadMovement(dt);
         }
-        
+
         controls.update(Date.now() - time);
 
         renderer.render(scene, camera);
 
         time = Date.now();
-        //update box positions
-        for(var i = 0; i < boxes.length; i++){
-            boxMeshes[i].position.copy(boxes[i].position);
-            boxMeshes[i].quaternion.copy(boxes[i].quaternion);
-        }
-		
-		keyboardControls();
+
+        keyboardControls();
     }
     
     function gamepadMovement(dt){
      
-        gamepad = navigator.getGamepads()[0];
-        var time = new Date().getTime()/1000;
+        gamepad = navigator.getGamepads();
         
-        var xAxis = gamepad.axes[0];
-        var yAxis = gamepad.axes[1];
-        var lookX = gamepad.axes[2];
-        var lookY = gamepad.axes[3];
-        var dPadUp = gamepad.buttons[12].pressed;
-        var dPadDown = gamepad.buttons[13].pressed;
-        var dPadLeft = gamepad.buttons[14].pressed;
-        var dPadRight = gamepad.buttons[15].pressed;
-        var aPressed = gamepad.buttons[0].pressed;
-        var triggerPressed = gamepad.buttons[7].pressed;
+        for(var i = 0; i < gamepad.length; i++){
+         
+            if(gamepad[i] != undefined){
+             
+                gamepad = navigator.getGamepads()[i];
+            }
+        }
         
         if(gamepad != undefined){
             
-            //left stick x axis and dPad movement
-            if(xAxis > 0.25){
-             
-                sphereBody.position.x += (xAxis * 10) * dt;
+            var time = new Date().getTime()/1000;
+
+            var xAxis = gamepad.axes[0];
+            var yAxis = gamepad.axes[1];
+            var lookX = gamepad.axes[2];
+            var lookY = gamepad.axes[3];
+            var dPadUp = gamepad.buttons[12].pressed;
+            var dPadDown = gamepad.buttons[13].pressed;
+            var dPadLeft = gamepad.buttons[14].pressed;
+            var dPadRight = gamepad.buttons[15].pressed;
+            var aPressed = gamepad.buttons[0].pressed;
+            var triggerPressed = gamepad.buttons[7].pressed;
+
+            if(gamepad != undefined){
+
+                //left stick x axis and dPad movement
+                if(xAxis > 0.25){
+
+                    sphereBody.position.x += (xAxis * 10) * dt;
+                }
+                else if(xAxis < -0.25){
+
+                    sphereBody.position.x -= (xAxis * -10) * dt;
+                }
+
+                if(dPadRight){
+
+                    sphereBody.position.x += 10 * dt;
+                }
+
+                if(dPadLeft){
+
+                    sphereBody.position.x -= 10 * dt;
+                }
+
+                //left stick y axis movement
+                if(yAxis > 0.25){
+
+                    sphereBody.position.z -= (yAxis * -10) * dt;
+                }else if(yAxis < -0.25){
+
+                    sphereBody.position.z += (yAxis * 10) * dt;
+                }
+
+                if(dPadUp){
+
+                    sphereBody.position.z -= 10 * dt;
+                }
+
+                if(dPadDown){
+
+                    sphereBody.position.z += 10 * dt;
+                }
+                console.log(controls.getObject());
+
+                if(lookX > 0.25){
+
+                    controls.getObject().rotation.y -= lookX * dt;
+                }
+                else if(lookX < -0.25){
+
+                    controls.getObject().rotation.y += -lookX * dt;
+                }
+
+                if(triggerPressed && time - fireTimer >= fireRate){
+
+                    fireTimer = new Date().getTime()/1000;
+
+                    onFire();
+                }
+
             }
-            else if(xAxis < -0.25){
-                
-                sphereBody.position.x -= (xAxis * -10) * dt;
-            }
-            
-            if(dPadRight){
-             
-                sphereBody.position.x += 10 * dt;
-            }
-            
-            if(dPadLeft){
-             
-                sphereBody.position.x -= 10 * dt;
-            }
-            
-            //left stick y axis movement
-            if(yAxis > 0.25){
-                
-                sphereBody.position.z -= (yAxis * -10) * dt;
-            }else if(yAxis < -0.25){
-                
-                sphereBody.position.z += (yAxis * 10) * dt;
-            }
-            
-            if(dPadUp){
-             
-                sphereBody.position.z -= 10 * dt;
-            }
-            
-            if(dPadDown){
-             
-                sphereBody.position.z += 10 * dt;
-            }
-            console.log(controls.getObject());
-            
-            if(lookX > 0.25){
-            
-                controls.getObject().rotation.y -= lookX * dt;
-            }
-            else if(lookX < -0.25){
-             
-                controls.getObject().rotation.y += -lookX * dt;
-            }
-            
-            if(triggerPressed && time - fireTimer >= fireRate){
-                
-                fireTimer = new Date().getTime()/1000;
-                
-                onFire();
-            }
-            
         }
     }
 
@@ -412,90 +294,72 @@ function render() {
         spotLight.shadowMapHeight = 2*512;
         scene.add(spotLight);
     }
-}
+
     
-function setupControls() {
-    controls = new PointerLockControls(camera, sphereBody);
-    scene.add(controls.getObject());
-    window.addEventListener('click', onFire, false);
-}
+    function setupControls() {
+        controls = new PointerLockControls(camera, sphereBody);
+        scene.add(controls.getObject());
+        window.addEventListener('click', onFire, false);
+    }
 
-function setupRenderer() {
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0xffffff);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMapEnabled = true;
-    renderer.shadowMapSoft = true;
-    document.body.appendChild(renderer.domElement);
-}
+    function setupRenderer() {
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor(0xffffff);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapSoft = true;
+        document.body.appendChild(renderer.domElement);
+    }
 
-function setupModels() {
-    var loader = new THREE.OBJMTLLoader();
-	loader.load('models/testExport.obj', 'models/testExport.mtl', function (loadedMesh) {
-        var material = new THREE.MeshPhongMaterial({color:0xf0f0f0});
-        // loadedMesh is a group of meshes. For
-        // each mesh set the material, and compute the information
-        // three.js needs for rendering.
-        loadedMesh.children.forEach(function (child) {
-            child.material = material;
-            child.geometry.computeFaceNormals();
-            child.geometry.computeVertexNormals();
+    function setupModels() {
+        var loader = new THREE.OBJMTLLoader();
+        loader.load('models/testExport.obj', 'models/testExport.mtl', function (loadedMesh) {
+            var material = new THREE.MeshPhongMaterial({color:0xf0f0f0});
+            // loadedMesh is a group of meshes. For
+            // each mesh set the material, and compute the information
+            // three.js needs for rendering.
+            loadedMesh.children.forEach(function (child) {
+                child.material = material;
+                child.geometry.computeFaceNormals();
+                child.geometry.computeVertexNormals();
+            });
+
+            characterMesh = loadedMesh;
+            loadedMesh.scale.set(0.5, 0.5, 0.5);
+            loadedMesh.position.x = -1;
+            loadedMesh.position.y = -1.2;
+            loadedMesh.position.z = -1;
+            loadedMesh.rotation.y = 3.1;
+            //loadedMesh.rotation.x = -0.2;
+            scene.add(loadedMesh);
+            camera.add(characterMesh);
         });
+    }
 
-        characterMesh = loadedMesh;
-        loadedMesh.scale.set(0.5, 0.5, 0.5);
-		loadedMesh.position.x = -1;
-		loadedMesh.position.y = -1.2;
-		loadedMesh.position.z = -1;
-		loadedMesh.rotation.y = 3.1;
-		//loadedMesh.rotation.x = -0.2;
-        scene.add(loadedMesh);
-		camera.add(characterMesh);
-    });
-}
+    function keyboardControls() {
+        keyboard.update();
 
-function keyboardControls() {
-	keyboard.update();
-		
-	if(keyboard.pressed("F") && firstPerson == false){
-		firstPerson = true;
-		thirdPerson = false;
-		characterMesh.position.x = 0;
-		characterMesh.position.y = -1.6;
-		characterMesh.position.z = 0.15;
-		x = 0.25;
-		y = 0.3;
-		z = 0;
-	}else if(keyboard.pressed("F") && firstPerson == true){
-		firstPerson = false;
-		thirdPerson = true;
-		characterMesh.position.x = -1;
-		characterMesh.position.y = -1.2;
-		characterMesh.position.z = -1;
-		x = -0.2;
-		y = 0.4;
-		z = 1;
-	}
-}
-
-function getShootDirection(targetVector) {
-    vector = targetVector;
-    targetVector.set(x, y, z);
-    vector.unproject(camera);
-    var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
-    targetVector.copy(ray.direction);
-}
-    
-//Event listeners
-function pointerLockChange(event) {
-    console.log(event);
-    
-    var element = document.body;
-    
-    if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-        controls.enabled = true;
-
+        if(keyboard.pressed("F") && firstPerson == false){
+            firstPerson = true;
+            thirdPerson = false;
+            characterMesh.position.x = 0;
+            characterMesh.position.y = -1.6;
+            characterMesh.position.z = 0.15;
+            x = 0.25;
+            y = 0.3;
+            z = 0;
+        }else if(keyboard.pressed("F") && firstPerson == true){
+            firstPerson = false;
+            thirdPerson = true;
+            characterMesh.position.x = -1;
+            characterMesh.position.y = -1.2;
+            characterMesh.position.z = -1;
+            x = -0.2;
+            y = 0.4;
+            z = 1;
+        }
+    }
     function setupFloor() {
         geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
         geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
