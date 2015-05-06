@@ -170,14 +170,13 @@ window.onload = function() {
     function gamepadMovement(dt){
      
         gamepad = navigator.getGamepads();
-        
-        for(var i = 0; i < gamepad.length; i++){
-         
-            if(gamepad[i] != undefined){
-             
-                gamepad = navigator.getGamepads()[i];
-            }
+        console.log(gamepad[1]);
+       
+        if(gamepad[0] != undefined){
+
+            gamepad = navigator.getGamepads()[0];
         }
+        else gamepad = undefined;
         
         if(gamepad != undefined){
             
