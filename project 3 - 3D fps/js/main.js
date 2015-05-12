@@ -50,6 +50,7 @@ window.onload = function() {
 
     //for gamepads
     var gamepad;
+    var triggerPressed;
     var fireRate = .1;
     var fireTimer = new Date().getTime()/1000;
 
@@ -155,7 +156,7 @@ window.onload = function() {
                 boxMeshes[i].quaternion.copy(boxes[i].quaternion);
             }
             
-            gamepadMovement(dt);
+            gamepadFireControl();
         }
 
         controls.update(Date.now() - time);
@@ -167,8 +168,28 @@ window.onload = function() {
         keyboardControls();
     }
     
-    function gamepadMovement(dt){
+    function gamepadFireControl(){
       
+        //gamepad
+        gamepad = navigator.getGamepads();
+        var localTime = new Date().getTime()/1000;
+
+        if(gamepad[0] != undefined){
+
+            gamepad = navigator.getGamepads()[0];
+            triggerPressed = gamepad.buttons[7].pressed;
+        }
+        else gamepad = undefined;
+        
+        if(gamepad != undefined){
+            
+            if(triggerPressed && localTime - fireTimer >= fireRate){
+
+                fireTimer = new Date().getTime()/1000;
+
+                onFire();
+            }
+        }
     }
 
     //Helper functions

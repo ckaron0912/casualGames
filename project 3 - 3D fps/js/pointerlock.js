@@ -10,7 +10,6 @@
     var jumpVelocity = 20;
     var scope = this;
      
-    var gamepad;
     var xAxis;
     var yAxis;
     var lookX;
@@ -20,7 +19,6 @@
     var dPadLeft;
     var dPadRight;
     var aPressed;
-    var triggerPressed;
      
     var pitchObject = new THREE.Object3D();
     pitchObject.add( camera );
@@ -182,28 +180,42 @@
             dPadLeft = gamepad.buttons[14].pressed;
             dPadRight = gamepad.buttons[15].pressed;
             aPressed = gamepad.buttons[0].pressed;
-            triggerPressed = gamepad.buttons[7].pressed;
 
-            if(gamepad != undefined){
+            //left stick x axis and dPad movement
 
-                //left stick x axis and dPad movement
+            if(lookX > 0.25){
 
-                if(lookX > 0.25){
+                yawObject.rotation.y -= (lookX * 10) * 0.002;
+                pitchObject.rotation.x -= (lookY * 10) * 0.002;
 
-                    //yawObject.rotation.y -= 2 * 0.002;
-                }
-                else if(lookX < -0.25){
+                pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+            }
+            else if(lookX < -0.25){
 
-                    //controls.getObject().rotation.y += -lookX * dt;
-                }
+                yawObject.rotation.y -= (lookX * 10) * 0.002;
+                pitchObject.rotation.x -= (lookY * 10) * 0.002;
 
-                //if(triggerPressed && time - fireTimer >= fireRate){
+                pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+            }
+            else if(lookY > 0.25){
 
-                    //fireTimer = new Date().getTime()/1000;
+                yawObject.rotation.y -= (lookX * 10) * 0.002;
+                pitchObject.rotation.x -= (lookY * 10) * 0.002;
 
-                    //onFire();
-                //}
+                pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+            }
+            else if(lookY < -0.25){
 
+                yawObject.rotation.y -= (lookX * 10) * 0.002;
+                pitchObject.rotation.x -= (lookY * 10) * 0.002;
+
+                pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+            }
+            
+            if(aPressed && canJump){
+             
+                velocity.y = jumpVelocity;
+                canJump = false;
             }
         }
 
