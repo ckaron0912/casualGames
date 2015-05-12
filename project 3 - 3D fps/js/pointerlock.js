@@ -9,7 +9,19 @@
     var velocityFactor = 0.2;
     var jumpVelocity = 20;
     var scope = this;
-
+     
+    var gamepad;
+    var xAxis;
+    var yAxis;
+    var lookX;
+    var lookY;
+    var dPadUp;
+    var dPadDown;
+    var dPadLeft;
+    var dPadRight;
+    var aPressed;
+    var triggerPressed;
+     
     var pitchObject = new THREE.Object3D();
     pitchObject.add( camera );
 
@@ -142,22 +154,70 @@
     this.update = function ( delta ) {
 
         if ( scope.enabled === false ) return;
-
+        
         delta *= 0.1;
 
         inputVelocity.set(0,0,0);
+        
+        //gamepad
+        gamepad = navigator.getGamepads();
+        console.log(gamepad);
 
-        if ( moveForward ){
+        if(gamepad[0] != undefined){
+
+            gamepad = navigator.getGamepads()[0];
+        }
+        else gamepad = undefined;
+        
+        if(gamepad != undefined){
+            
+            var time = new Date().getTime()/1000;
+
+            xAxis = gamepad.axes[0];
+            yAxis = gamepad.axes[1];
+            lookX = gamepad.axes[2];
+            lookY = gamepad.axes[3];
+            dPadUp = gamepad.buttons[12].pressed;
+            dPadDown = gamepad.buttons[13].pressed;
+            dPadLeft = gamepad.buttons[14].pressed;
+            dPadRight = gamepad.buttons[15].pressed;
+            aPressed = gamepad.buttons[0].pressed;
+            triggerPressed = gamepad.buttons[7].pressed;
+
+            if(gamepad != undefined){
+
+                //left stick x axis and dPad movement
+
+                if(lookX > 0.25){
+
+                    //yawObject.rotation.y -= 2 * 0.002;
+                }
+                else if(lookX < -0.25){
+
+                    //controls.getObject().rotation.y += -lookX * dt;
+                }
+
+                //if(triggerPressed && time - fireTimer >= fireRate){
+
+                    //fireTimer = new Date().getTime()/1000;
+
+                    //onFire();
+                //}
+
+            }
+        }
+
+        if ( moveForward || yAxis < -0.25 || dPadUp){
             inputVelocity.z = -velocityFactor * delta;
         }
-        if ( moveBackward ){
+        if ( moveBackward || yAxis > 0.25 || dPadDown){
             inputVelocity.z = velocityFactor * delta;
         }
 
-        if ( moveLeft ){
+        if ( moveLeft || xAxis < -0.25 || dPadLeft ){
             inputVelocity.x = -velocityFactor * delta;
         }
-        if ( moveRight ){
+        if ( moveRight || xAxis > 0.25 || dPadRight ){
             inputVelocity.x = velocityFactor * delta;
         }
 
