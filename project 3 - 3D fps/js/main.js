@@ -49,8 +49,8 @@ window.onload = function() {
     var bulletMeshes = [];
     var boxes = [];
     var boxMeshes = [];
-    //var cylinders = [];
-    //var cylinderMeshes = [];
+    var course1Targets = [];
+    var course1TargetMeshes = [];
 
     //for gamepads
     var gamepad;
@@ -165,12 +165,12 @@ window.onload = function() {
                 boxMeshes[i].quaternion.copy(boxes[i].quaternion);
             }
             
-            //update cylinder positions
-            //for(var i = 0; i < cylinders.length; i++){
-             
-                //cylinderMeshes[i].position.copy(cylinders[i].position);
-                //cylinderMeshes[i].quaternion.copy(cylinders[i].quaternion);
-            //}
+            //update box positions
+            for(var i = 0; i < course1Targets.length; i++){
+                
+                course1TargetMeshes[i].position.copy(course1Targets[i].position);
+                course1TargetMeshes[i].quaternion.copy(course1Targets[i].quaternion);
+            }
             
             gamepadFireControl();
         }
@@ -210,6 +210,7 @@ window.onload = function() {
 
     //Helper functions
     function setupPointerLock() {
+        
         if (havePointerLock) {
             //hook pointer lock state change events
             document.addEventListener('pointerlockchange', pointerLockChange, false);
@@ -316,7 +317,27 @@ window.onload = function() {
          
             placeMoreTargets();
         }
+        
+        if(keyboard.up("L")){
+            
+            cleanUp();
+        }
     }
+    
+    function cleanUp(){
+        
+        for(var i = 0; i < course1Targets.length; i++){
+         
+            world.remove(course1Targets[i]);
+            scene.remove(course1TargetMeshes[i]);
+        }
+        
+        course1TargetMeshes = [];
+        course1Targets = [];
+        
+        //placeMoreTargets();
+    }
+    
     function setupFloor() {
         geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
         geometry.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
@@ -468,8 +489,8 @@ window.onload = function() {
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
 
-            boxes.push(boxBody);
-            boxMeshes.push(boxMesh);
+            course1Targets.push(boxBody);
+            course1TargetMeshes.push(boxMesh);
         }
         
         //targets on left
@@ -489,25 +510,9 @@ window.onload = function() {
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
 
-            boxes.push(boxBody);
-            boxMeshes.push(boxMesh);
+            course1Targets.push(boxBody);
+            course1TargetMeshes.push(boxMesh);
         }
-
-        //cylinderShape = new CANNON.Cylinder( 2, 2, 4, 10);
-        //cylinderGeometry = new THREE.CylinderGeometry(2, 2, 4, 10);
-        //cylinderBody = new CANNON.Body({mass: 10});
-        //cylinderBody.addShape(cylinderShape);
-        //cylinderBody.position.set(0, 2, -55);
-        //world.addBody(cylinderBody);
-        
-        //cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
-        //cylinderMesh.position.set(0, 2, -55);
-        //cylinderMesh.castShadow = true;
-        //cylinderMesh.receiveShadow = true;
-        //scene.add(cylinderMesh);
-        
-        //cylinders.push(cylinderBody);
-        //cylinderMeshes.push(cylinderMesh);
     }
     
     function placeMoreTargets(){
@@ -531,8 +536,8 @@ window.onload = function() {
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
 
-            boxes.push(boxBody);
-            boxMeshes.push(boxMesh);
+            course1Targets.push(boxBody);
+            course1TargetMeshes.push(boxMesh);
         }
         
         //targets on left
@@ -552,8 +557,8 @@ window.onload = function() {
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
 
-            boxes.push(boxBody);
-            boxMeshes.push(boxMesh);
+            course1Targets.push(boxBody);
+            course1TargetMeshes.push(boxMesh);
         }   
     }
 
@@ -664,6 +669,15 @@ window.onload = function() {
             bulletBody.position.set(x, y, z);
             bulletMesh.position.set(x, y, z);
             console.log(bullets[0]);
+        }
+        
+        //if there are more bullets than the limit, remove the oldest bullet
+        if(bullets.length > 50){
+         
+            world.remove(bullets[0]);
+            scene.remove(bulletMeshes[0]);
+            bullets.splice(0, 1);
+            bulletMeshes.splice(0, 1);
         }
     }
 

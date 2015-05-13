@@ -159,7 +159,6 @@
         
         //gamepad
         gamepad = navigator.getGamepads();
-        console.log(gamepad);
 
         if(gamepad[0] != undefined){
 
