@@ -22,8 +22,10 @@ window.onload = function() {
     var renderer;
     var geometry;
     var material;
+    var targetMaterial;
     var mesh;
     var characterMesh;
+    var spotLight;
 
     var firstPerson = false;
     var thirdPerson = true;
@@ -40,13 +42,15 @@ window.onload = function() {
     var bulletShape;
     var bulletGeometry;
     var shootDirection;
-    var shootVelocity = 30;
+    var shootVelocity = 50;
     var bulletRadius = 0.1;
     var walls = [];
     var bullets = [];
     var bulletMeshes = [];
     var boxes = [];
     var boxMeshes = [];
+    //var cylinders = [];
+    //var cylinderMeshes = [];
 
     //for gamepads
     var gamepad;
@@ -89,15 +93,19 @@ window.onload = function() {
         else
             world.solver = solver;
 
-        world.gravity.set(0, -20, 0);
+        world.gravity.set(0, -50, 0);
         world.broadphase = new CANNON.NaiveBroadphase();
 
         //create physics material
-        physicsMaterial = new CANNON.Material("slipperyMaterial");
+        physicsMaterial = new CANNON.Material("groundMaterial");
         var physicsContactMaterial = new CANNON.ContactMaterial(physicsMaterial,
                                                                 physicsMaterial,
-                                                                0.0, // friction coefficient
-                                                                0.3  // restitution
+                                                                {friction: 0.4, // friction coefficient
+                                                                restitution: 0.3,  // restitution
+                                                                contactEquationStiffness: 1e8,
+                                                                contactEquationRelaxation: 3,
+                                                                frictionEquationStiffness: 1e8,
+                                                                frictionEquationRegularizationTime: 3}
                                                                 );
         world.addContactMaterial(physicsContactMaterial);
 
@@ -156,6 +164,13 @@ window.onload = function() {
                 boxMeshes[i].position.copy(boxes[i].position);
                 boxMeshes[i].quaternion.copy(boxes[i].quaternion);
             }
+            
+            //update cylinder positions
+            //for(var i = 0; i < cylinders.length; i++){
+             
+                //cylinderMeshes[i].position.copy(cylinders[i].position);
+                //cylinderMeshes[i].quaternion.copy(cylinders[i].quaternion);
+            //}
             
             gamepadFireControl();
         }
@@ -219,7 +234,7 @@ window.onload = function() {
         light.target.position.set(0, 0, 0);
         scene.add(light);
 
-        var spotLight = new THREE.SpotLight(0x00ffff);
+        spotLight = new THREE.SpotLight(0x00ffff);
         spotLight.position.set(0, 30, 0);
         spotLight.castShadow = true;
         spotLight.shadowCameraNear = 20;
@@ -296,6 +311,11 @@ window.onload = function() {
             y = 0.4;
             z = 1;
         }
+        
+        if(keyboard.up("R")){
+         
+            placeMoreTargets();
+        }
     }
     function setupFloor() {
         geometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
@@ -308,6 +328,7 @@ window.onload = function() {
     }
 
     function setupWalls() {
+        
         var halfExtents = new CANNON.Vec3(1, 1, 1);
         var boxShape = new CANNON.Box(halfExtents);
         var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
@@ -335,7 +356,205 @@ window.onload = function() {
     
     function loadObstacleCourse(){
      
+        var mass = 100000;
+        var halfExtents;
+        var boxShape;
+        var boxBody;
+        var boxGeometry;
+        var boxMesh;
+        var nextLength = 0;
+        var cylinderShape;
+        var cylinderBody;
+        var cylinderMesh;
+        var cylinderGeometry;
         
+        for(var i = 0; i < 20; i++){
+            
+            halfExtents = new CANNON.Vec3(2, 0.075 * i, 0.5);
+            boxShape = new CANNON.Box(halfExtents);
+            boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            boxBody = new CANNON.Body({mass: mass});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(0, 0.5 + (i*0.15), -15 - i);
+            world.addBody(boxBody);
+
+            boxMesh = new THREE.Mesh(boxGeometry, material);
+            boxMesh.position.set(0, 0.5 + (i*0.15), -15 - i);
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+            nextLength++;
+        }
+        
+        nextLength = nextLength + 5;
+        halfExtents = new CANNON.Vec3(2, 2, 5);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(0, 0.5 + (nextLength*0.15), -20 - nextLength);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(0, 0.5 + (nextLength*0.15), -20 - nextLength);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        //stands for targets right
+        for(var i = 0; i < 4; i++){
+            
+            halfExtents = new CANNON.Vec3(0.5, 3, 1);
+            boxShape = new CANNON.Box(halfExtents);
+            boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            boxBody = new CANNON.Body({mass: mass});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(7, 5.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            boxMesh = new THREE.Mesh(boxGeometry, material);
+            boxMesh.position.set(7, 5.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }
+        
+        //stands for targets left
+        for(var i = 0; i < 4; i++){
+            
+            halfExtents = new CANNON.Vec3(0.5, 3, 1);
+            boxShape = new CANNON.Box(halfExtents);
+            boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            boxBody = new CANNON.Body({mass: mass});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(-7, 5.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            boxMesh = new THREE.Mesh(boxGeometry, material);
+            boxMesh.position.set(-7, 5.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }
+        
+        targetMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+        
+        //targets on right
+        for(var i = 0; i < 4; i++){
+            
+            halfExtents = new CANNON.Vec3(0.25, 0.5, 0.5);
+            boxShape = new CANNON.Box(halfExtents);
+            boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            boxBody = new CANNON.Body({mass: 5});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+            boxMesh.position.set(7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }
+        
+        //targets on left
+        for(var i = 0; i < 4; i++){
+            
+            halfExtents = new CANNON.Vec3(0.25, 0.5, 0.5);
+            boxShape = new CANNON.Box(halfExtents);
+            boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            boxBody = new CANNON.Body({mass: 5});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(-7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+            boxMesh.position.set(-7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }
+
+        //cylinderShape = new CANNON.Cylinder( 2, 2, 4, 10);
+        //cylinderGeometry = new THREE.CylinderGeometry(2, 2, 4, 10);
+        //cylinderBody = new CANNON.Body({mass: 10});
+        //cylinderBody.addShape(cylinderShape);
+        //cylinderBody.position.set(0, 2, -55);
+        //world.addBody(cylinderBody);
+        
+        //cylinderMesh = new THREE.Mesh(cylinderGeometry, material);
+        //cylinderMesh.position.set(0, 2, -55);
+        //cylinderMesh.castShadow = true;
+        //cylinderMesh.receiveShadow = true;
+        //scene.add(cylinderMesh);
+        
+        //cylinders.push(cylinderBody);
+        //cylinderMeshes.push(cylinderMesh);
+    }
+    
+    function placeMoreTargets(){
+        
+        var nextLength = 25;
+     
+        //targets on right
+        for(var i = 0; i < 4; i++){
+            
+            var halfExtents = new CANNON.Vec3(0.25, 0.5, 0.5);
+            var boxShape = new CANNON.Box(halfExtents);
+            var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            var boxBody = new CANNON.Body({mass: 5});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            var boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+            boxMesh.position.set(7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }
+        
+        //targets on left
+        for(var i = 0; i < 4; i++){
+            
+            var halfExtents = new CANNON.Vec3(0.25, 0.5, 0.5);
+            var boxShape = new CANNON.Box(halfExtents);
+            var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+            var boxBody = new CANNON.Body({mass: 5});
+            boxBody.addShape(boxShape);
+            boxBody.position.set(-7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            world.addBody(boxBody);
+
+            var boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+            boxMesh.position.set(-7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.castShadow = true;
+            boxMesh.receiveShadow = true;
+            scene.add(boxMesh);
+
+            boxes.push(boxBody);
+            boxMeshes.push(boxMesh);
+        }   
     }
 
     function setupControls() {

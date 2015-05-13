@@ -7,7 +7,7 @@
 
     var eyeYPos = 2; // eyes are 2 meters above the ground
     var velocityFactor = 0.2;
-    var jumpVelocity = 20;
+    var jumpVelocity = 25;
     var scope = this;
      
     var xAxis;
