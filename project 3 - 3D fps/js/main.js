@@ -132,6 +132,7 @@ window.onload = function() {
         setupControls();
         setupRenderer();
         setupModels();
+        loadObstacleCourse();
 
         window.addEventListener('resize', onWindowResize, false);
     }
@@ -330,6 +331,11 @@ window.onload = function() {
             boxes.push(boxBody);
             boxMeshes.push(boxMesh);
         }
+    }
+    
+    function loadObstacleCourse(){
+     
+        
     }
 
     function setupControls() {
