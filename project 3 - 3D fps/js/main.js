@@ -202,7 +202,7 @@ window.onload = function() {
         if (!isPlayingSoundClip) {
             var rand = Math.random();
             
-            if (rand < 0.005) {
+            if (rand < 0.001) {
                 isPlayingSoundClip = true;
                 var clipIndex = getRandomInt(0, soundClips.length - 1);
                 var clipPath = soundFilePath + soundClips[clipIndex];
