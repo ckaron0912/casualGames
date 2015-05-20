@@ -335,7 +335,7 @@ window.onload = function() {
         course1TargetMeshes = [];
         course1Targets = [];
         
-        //placeMoreTargets();
+        placeMoreTargets();
     }
     
     function setupFloor() {
@@ -354,25 +354,22 @@ window.onload = function() {
         var boxShape = new CANNON.Box(halfExtents);
         var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
 
-        for(var i = 0; i < 20; i++) {
-            var x = (Math.random() - 0.5) * 20;
-            var y = 2;
-            var z = (Math.random()  -0.5) * 20;
-
-            var boxBody = new CANNON.Body({ mass: 1 });
-            boxBody.addShape(boxShape);
-            boxBody.position.set(x, y, z);
-            world.addBody(boxBody);
-
-            var boxMesh = new THREE.Mesh(boxGeometry, material);
-            boxMesh.position.set(x, y, z);
-            boxMesh.castShadow = true;
-            boxMesh.receiveShadow = true;
-            scene.add(boxMesh);
-
-            boxes.push(boxBody);
-            boxMeshes.push(boxMesh);
-        }
+       for(var i = 0; i < 20; i++) {
+           var x = (Math.random() - 0.5) * 20;
+           var y = 2;
+           var z = (Math.random()  -0.5) * 20
+           var boxBody = new CANNON.Body({ mass: 1 });
+           boxBody.addShape(boxShape);
+           boxBody.position.set(x, y, z);
+           world.addBody(boxBody)
+           var boxMesh = new THREE.Mesh(boxGeometry, material);
+           boxMesh.position.set(x, y, z);
+           boxMesh.castShadow = true;
+           boxMesh.receiveShadow = true;
+           scene.add(boxMesh)
+           boxes.push(boxBody);
+           boxMeshes.push(boxMesh);
+       }
     }
     
     function loadObstacleCourse(){
@@ -436,11 +433,11 @@ window.onload = function() {
             boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             boxBody = new CANNON.Body({mass: mass});
             boxBody.addShape(boxShape);
-            boxBody.position.set(7, 5.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(7, .5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             boxMesh = new THREE.Mesh(boxGeometry, material);
-            boxMesh.position.set(7, 5.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(7, .5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
@@ -457,11 +454,11 @@ window.onload = function() {
             boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             boxBody = new CANNON.Body({mass: mass});
             boxBody.addShape(boxShape);
-            boxBody.position.set(-7, 5.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(-7, .5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             boxMesh = new THREE.Mesh(boxGeometry, material);
-            boxMesh.position.set(-7, 5.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(-7, .5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
@@ -480,11 +477,11 @@ window.onload = function() {
             boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             boxBody = new CANNON.Body({mass: 5});
             boxBody.addShape(boxShape);
-            boxBody.position.set(7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(7, 5.5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
-            boxMesh.position.set(7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(7, 5.5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
@@ -501,11 +498,11 @@ window.onload = function() {
             boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             boxBody = new CANNON.Body({mass: 5});
             boxBody.addShape(boxShape);
-            boxBody.position.set(-7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(-7, 5.5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
-            boxMesh.position.set(-7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(-7, 5.5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
@@ -513,6 +510,201 @@ window.onload = function() {
             course1Targets.push(boxBody);
             course1TargetMeshes.push(boxMesh);
         }
+        
+        //second course
+        
+        //walls
+        //right
+        halfExtents = new CANNON.Vec3( 6, .5, .2);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(20, 0.5 + (0.15), 4.8);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(20, 0.5 + (0.15), 4.8);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        //left
+        halfExtents = new CANNON.Vec3( 6, .5, .2);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(20, 0.5 + (0.15), -4.8);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(20, 0.5 + (0.15), -4.8);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        //back
+        halfExtents = new CANNON.Vec3( .2, .5, 4.6);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(25.5, 0.5 + (0.15), 0);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(25.5, 0.5 + (0.15), 0);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        //backstands
+        halfExtents = new CANNON.Vec3( .5, .6, .5);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(40, 0.5 + (0.15), 3);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(40, 0.5 + (0.15), 3);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( .5, .6, .5);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(45, 0.5 + (0.15), -3);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(45, 0.5 + (0.15), -3);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( .5, 1.5, .5);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(47, 0.5 + (0.15), -2);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(47, 0.5 + (0.15), -2);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( .5, .9, .5);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: mass});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(49, 0.5 + (0.15), 1);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, material);
+        boxMesh.position.set(49, 0.5 + (0.15), 1);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        //backstand targets
+        halfExtents = new CANNON.Vec3( 0.15, 0.3, 0.3);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: 5});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(40, 1 + (0.15), 3);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+        boxMesh.position.set(40, 1 + (0.15), 3);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( 0.15, 0.3, 0.3);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: 5});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(45, 1 + (0.15), -3);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+        boxMesh.position.set(45, 1 + (0.15), -3);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( 0.15, 0.3, 0.3);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: 5});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(47, 1.7 + (0.15), -2);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+        boxMesh.position.set(47, 1.7 + (0.15), -2);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
+        
+        halfExtents = new CANNON.Vec3( 0.15, 0.3, 0.3);
+        boxShape = new CANNON.Box(halfExtents);
+        boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
+        boxBody = new CANNON.Body({mass: 5});
+        boxBody.addShape(boxShape);
+        boxBody.position.set(49, 1.2 + (0.15), 1);
+        world.addBody(boxBody);
+
+        boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
+        boxMesh.position.set(49, 1.2 + (0.15), 1);
+        boxMesh.castShadow = true;
+        boxMesh.receiveShadow = true;
+        scene.add(boxMesh);
+
+        boxes.push(boxBody);
+        boxMeshes.push(boxMesh);
     }
     
     function placeMoreTargets(){
@@ -527,11 +719,11 @@ window.onload = function() {
             var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             var boxBody = new CANNON.Body({mass: 5});
             boxBody.addShape(boxShape);
-            boxBody.position.set(7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(7, 5.5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             var boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
-            boxMesh.position.set(7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(7, 5.5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
@@ -548,11 +740,11 @@ window.onload = function() {
             var boxGeometry = new THREE.BoxGeometry(halfExtents.x * 2, halfExtents.y * 2, halfExtents.z * 2);
             var boxBody = new CANNON.Body({mass: 5});
             boxBody.addShape(boxShape);
-            boxBody.position.set(-7, 10.5 + (nextLength*0.15), -40 -  (i*3));
+            boxBody.position.set(-7, 5.5 + (nextLength*0.15), -40 -  (i*3));
             world.addBody(boxBody);
 
             var boxMesh = new THREE.Mesh(boxGeometry, targetMaterial);
-            boxMesh.position.set(-7, 10.5 + (nextLength*0.15), -40 - (i*3));
+            boxMesh.position.set(-7, 5.5 + (nextLength*0.15), -40 - (i*3));
             boxMesh.castShadow = true;
             boxMesh.receiveShadow = true;
             scene.add(boxMesh);
