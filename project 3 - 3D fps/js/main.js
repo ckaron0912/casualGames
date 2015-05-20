@@ -57,10 +57,16 @@ window.onload = function() {
     var triggerPressed;
     var fireRate = .1;
     var fireTimer = new Date().getTime()/1000;
-
     var controls = Date.now; 
     var time = Date.now;
 
+    //sounds
+    var soundFilePath = "media/sounds/";
+    var repulsorSound = soundFilePath + "repulsor.mp3";
+    var themeMusic = soundFilePath + "themeSong.mp3";
+    var soundClips = ["breach.mp3", "caught.mp3", "fly.mp3", "galaga.mp3", "myturn.mp3", "party.mp3"];
+    var isPlayingSoundClip = false;
+    
     //HTML elements
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
@@ -128,6 +134,7 @@ window.onload = function() {
     }
 
     function initScene() {
+        
         scene = new THREE.Scene();
         scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
@@ -143,6 +150,15 @@ window.onload = function() {
         loadObstacleCourse();
 
         window.addEventListener('resize', onWindowResize, false);
+        
+        var backgroundMusic = new Audio(themeMusic);
+        backgroundMusic.volume = 0.25
+        backgroundMusic.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+            console.log("looped!")
+        })
+        backgroundMusic.play();
     }
 
     function render() {
@@ -182,6 +198,21 @@ window.onload = function() {
         time = Date.now();
 
         keyboardControls();
+        
+        if (!isPlayingSoundClip) {
+            var rand = Math.random();
+            
+            if (rand < 0.005) {
+                isPlayingSoundClip = true;
+                var clipIndex = getRandomInt(0, soundClips.length - 1);
+                var clipPath = soundFilePath + soundClips[clipIndex];
+                var soundClip = new Audio(clipPath);
+                soundClip.addEventListener('ended', function() {
+                    isPlayingSoundClip = false;
+                })
+                soundClip.play()
+            }
+        }
     }
     
     function gamepadFireControl(){
@@ -248,7 +279,6 @@ window.onload = function() {
         scene.add(spotLight);
     }
 
-    
     function setupControls() {
         controls = new PointerLockControls(camera, sphereBody);
         scene.add(controls.getObject());
@@ -777,6 +807,10 @@ window.onload = function() {
         var ray = new THREE.Ray(sphereBody.position, vector.sub(sphereBody.position).normalize());
         targetVector.copy(ray.direction);
     }
+        
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
     //Event listeners
     function pointerLockChange(event) {
@@ -825,6 +859,9 @@ window.onload = function() {
 
     function onFire(event) {
         if (controls.enabled) {
+            var repulsorSoundEffect = new Audio(repulsorSound);
+            repulsorSoundEffect.play();
+            
             //create bullet
             bulletShape = new CANNON.Sphere(bulletRadius);
             bulletGeometry = new THREE.SphereGeometry(bulletRadius, 32, 32);
