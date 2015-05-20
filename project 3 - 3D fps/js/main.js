@@ -26,6 +26,7 @@ window.onload = function() {
     var mesh;
     var characterMesh;
     var spotLight;
+    var bulletLight;
 
     var firstPerson = false;
     var thirdPerson = true;
@@ -199,6 +200,11 @@ window.onload = function() {
 
         keyboardControls();
         
+        //light bullets
+        if (bullets.length > 0) {
+            spotLight.position.set(bullets[bullets.length - 1].position.x,  bullets[bullets.length - 1].position.y, bullets[bullets.length - 1].position.z); 
+        }
+        
         if (!isPlayingSoundClip) {
             var rand = Math.random();
             
@@ -216,7 +222,7 @@ window.onload = function() {
     }
     
     function gamepadFireControl(){
-      
+      0
         //gamepad
         gamepad = navigator.getGamepads();
         var localTime = new Date().getTime()/1000;
@@ -261,21 +267,16 @@ window.onload = function() {
     }
 
     function setupLights() {
-        var light = new THREE.DirectionalLight(0xffffff, 0.5);
+        var light = new THREE.DirectionalLight(0xffffff, 0.75);
         light.position.set(0.5, 1, 0.5);
         light.target.position.set(0, 0, 0);
+        light.angle = 0.15
         scene.add(light);
 
         spotLight = new THREE.SpotLight(0x00ffff);
-        spotLight.position.set(0, 30, 0);
+        spotLight.position.set(0, -1, 0);
         spotLight.castShadow = true;
-        spotLight.shadowCameraNear = 20;
-        spotLight.shadowCameraFar = 50;
-        spotLight.shadowCameraFov = 40;
-        spotLight.shadowMapBias = 0.1;
-        spotLight.shadowMapDarkness = 0.7;
-        spotLight.shadowMapWidth = 2*512;
-        spotLight.shadowMapHeight = 2*512;
+        spotLight.distance = 50;
         scene.add(spotLight);
     }
 
@@ -309,14 +310,16 @@ window.onload = function() {
             });
 
             characterMesh = loadedMesh;
-            loadedMesh.scale.set(0.5, 0.5, 0.5);
-            loadedMesh.position.x = -1;
-            loadedMesh.position.y = -1.2;
-            loadedMesh.position.z = -1;
-            loadedMesh.rotation.y = 3.1;
+            characterMesh.scale.set(0.5, 0.5, 0.5);
+            characterMesh.position.x = -1;
+            characterMesh.position.y = -1.2;
+            characterMesh.position.z = -1;
+            characterMesh.rotation.y = 3.1;
             //loadedMesh.rotation.x = -0.2;
-            scene.add(loadedMesh);
+            //characterMesh.name = 'player';
+            scene.add(characterMesh);
             camera.add(characterMesh);
+            //characterMesh.addChild(spotLight)
         });
     }
 
@@ -865,6 +868,7 @@ window.onload = function() {
             //create bullet
             bulletShape = new CANNON.Sphere(bulletRadius);
             bulletGeometry = new THREE.SphereGeometry(bulletRadius, 32, 32);
+            material = new THREE.MeshLambertMaterial({ color: 0x7df9ff });
             shootDirection = new THREE.Vector3();
 
             //get initial position
@@ -897,7 +901,12 @@ window.onload = function() {
             z += shootDirection.z * (sphereShape.radius * 1.02 + bulletShape.radius);
             bulletBody.position.set(x, y, z);
             bulletMesh.position.set(x, y, z);
-            console.log(bullets[0]);
+            
+            //attach light
+            spotLight.position.set(bulletMesh.position.x, bulletMesh.position.y, bulletMesh.position.z);
+            spotLight.target = bulletMesh;
+            
+            //console.log(bullets[0]);
         }
         
         //if there are more bullets than the limit, remove the oldest bullet
