@@ -230,7 +230,6 @@ window.onload = function() {
     }
     
     function gamepadFireControl(){
-      0
         //gamepad
         gamepad = navigator.getGamepads();
         var localTime = new Date().getTime()/1000;
@@ -275,11 +274,10 @@ window.onload = function() {
     }
 
     function setupLights() {
-        var light = new THREE.DirectionalLight(0xffffff, 0.75);
-        light.position.set(-0.5, 1, 1);
-        light.target.position.set(0, 0, 0);
-        light.angle = 0.15
-        scene.add(light);
+        
+        var light = new THREE.PointLight( 0xffffff, .75, 100 );
+        light.position.set( -1, 10, -1 );
+        scene.add( light );
 
         spotLight = new THREE.SpotLight(0x00ffff);
         spotLight.position.set(0, -1, 0);
