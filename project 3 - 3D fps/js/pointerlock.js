@@ -184,29 +184,29 @@
 
             if(lookX > 0.25){
 
-                yawObject.rotation.y -= (lookX * 10) * 0.002;
-                pitchObject.rotation.x -= (lookY * 10) * 0.002;
+                yawObject.rotation.y -= (lookX * 15) * 0.002;
+                pitchObject.rotation.x -= (lookY * 15) * 0.002;
 
                 pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
             }
             else if(lookX < -0.25){
 
-                yawObject.rotation.y -= (lookX * 10) * 0.002;
-                pitchObject.rotation.x -= (lookY * 10) * 0.002;
+                yawObject.rotation.y -= (lookX * 15) * 0.002;
+                pitchObject.rotation.x -= (lookY * 15) * 0.002;
 
                 pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
             }
             else if(lookY > 0.25){
 
-                yawObject.rotation.y -= (lookX * 10) * 0.002;
-                pitchObject.rotation.x -= (lookY * 10) * 0.002;
+                yawObject.rotation.y -= (lookX * 15) * 0.002;
+                pitchObject.rotation.x -= (lookY * 15) * 0.002;
 
                 pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
             }
             else if(lookY < -0.25){
 
-                yawObject.rotation.y -= (lookX * 10) * 0.002;
-                pitchObject.rotation.x -= (lookY * 10) * 0.002;
+                yawObject.rotation.y -= (lookX * 15) * 0.002;
+                pitchObject.rotation.x -= (lookY * 15) * 0.002;
 
                 pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
             }
